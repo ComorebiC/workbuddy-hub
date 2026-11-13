@@ -28,13 +28,3 @@ services:
       # 持久化数据目录：升级与重建容器时绝不丢失配置与用量
       - ./accounts:/app/accounts
       - ./usage:/app/usage
-
-  # 可选：Watchtower 自动静默更新服务（取消注释即可开启）
-  # 每天自动检查镜像更新，拉取新版本并优雅重启 wb-proxy
-  # watchtower:
-  #   image: containrrr/watchtower:latest
-  #   container_name: wb-proxy-watchtower
-  #   restart: unless-stopped
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock
-  #   command: --interval 86400 --cleanup wb-proxy
