@@ -7,10 +7,8 @@ services:
     image: ghcr.io/ardeyouxipianyi/workbuddy2api-hub:latest
     container_name: wb-proxy
     restart: unless-stopped
-    # Defaults to root (0:0), i.e. the historical behaviour. To run as your own
-    # host user instead, set PUID/PGID (e.g. PUID=$(id -u) PGID=$(id -g)
-    # docker compose up -d) and make sure ./accounts and ./usage are writable
-    # by that uid; see the README's Docker section.
+    # 默认 root(0:0)。命名卷初始属主为 root，若改成非 0 的 PUID/PGID，
+    # 需先手动 chown 卷目录，否则容器内会写不进去。
     user: "${PUID:-0}:${PGID:-0}"
     ports:
       # 宿主机端口:容器端口（右侧必须与下面的 PORT 保持一致）
@@ -18,13 +16,17 @@ services:
     environment:
       - HOST=0.0.0.0
       - PORT=8788
-      # 留空则启动时自动生成高强度 API Key 写入 ./accounts/settings.json 并打印在启动日志中
+      # 留空则启动时自动生成高强度 API Key 写入 settings.json 并打印在启动日志中
       # - API_KEY=your_secret_key
       - TZ=Asia/Shanghai
       # 默认 auto：镜像内 Go/uTLS 桥可用则使用，不可用则自动回退 Python/OpenSSL。
       # 彻底关闭桥时改为 python；强制桥（失败即报错）时改为 node。
       # - WB_TLS_FINGERPRINT=python
     volumes:
-      # 持久化数据目录：升级与重建容器时绝不丢失配置与用量
-      - ./accounts:/app/accounts
-      - ./usage:/app/usage
+      # 持久化数据目录（命名卷，升级与重建容器时绝不丢失配置与用量）
+      - wb-accounts:/app/accounts
+      - wb-usage:/app/usage
+
+volumes:
+  wb-accounts:
+  wb-usage:
